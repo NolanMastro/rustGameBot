@@ -16,7 +16,9 @@ from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCom
 
 
 async def main():
-    info ={}
+    info={}
+
+
 
 
     types = {
@@ -88,6 +90,9 @@ async def main():
         message = ""
         offlineMembers = ""
         for i in range(len(team_info.members)):
+            if len(message) > 110:
+                await socket.send_team_message(message)
+                message = ""
 
             if team_info.members[i].steam_id == 76561199149660324:
                 name = 'diddy'
@@ -101,11 +106,15 @@ async def main():
                 message += f'{name}: ALIVE @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)}\n'
                 message+=f'{Emoji.HEART}'
             else:
-                message += f'{name}: DEAD @{team_info.members[i].death}\n'
+                days, hours, minutes = convert_epoch_to_hours(team_info.members[i].death_time)
+                message += f'{name}: DEAD @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)} {minutes} min ago\n'
                 message+=f'{Emoji.SKULL}'
             
         await socket.send_team_message(message)
-        await socket.send_team_message(f'Offline Members: {offlineMembers}')
+        if offlineMembers == "":
+            pass
+        else:
+            await socket.send_team_message(f'Offline Members: {offlineMembers}')
 
 
     @Command(server_details)
@@ -118,19 +127,125 @@ async def main():
             print(f'{types[marker.type]}, type {marker.type} detected at {convert_xy_to_grid(marker.x,marker.y,inital_data)}')
 
     def convert_epoch_to_hours(epoch_timestamp):
+        # Get the current time
         current_time = datetime.datetime.now()
+
+        # Convert the epoch timestamp to a datetime object
         target_time = datetime.datetime.fromtimestamp(epoch_timestamp)
+
+        # Calculate the difference
         time_difference = target_time - current_time
 
+        # Extract days, hours, and minutes
         days = time_difference.days
         hours, remainder = divmod(time_difference.seconds, 3600)
         minutes, _ = divmod(remainder, 60)
 
         return days, hours, minutes
-        
+
+
+    @Command(server_details)
+    async def setf(command: ChatCommand):
+        team_chat = await socket.get_team_chat()
+        latest_message = team_chat[-1].message if team_chat else ""
+        if latest_message.startswith("!setf"):
+            _, number = latest_message.split(maxsplit=1)
+            global f_id
+            f_id = int(number)
+            await socket.send_team_message(f'Set furnace smart switch to {f_id}')
+    
+    @Command(server_details)# 5433672
+    async def f(command: ChatCommand):
+        try:
+            print(f_id)
+        except:
+            await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
+        switch_info = await socket.get_entity_info(f_id)
+        if switch_info.value:
+            await socket.set_entity_value(f_id, False)
+            await socket.send_team_message('Furnaces off.')
+        else:
+            await socket.set_entity_value(f_id, True)
+            await socket.send_team_message('Furnaces on.')
+
+
+    @Command(server_details)
+    async def monitorf(command: ChatCommand):
+        team_chat = await socket.get_team_chat()
+        latest_message = team_chat[-1].message if team_chat else ""
+        if latest_message.startswith("!monitorf"):
+            _, number = latest_message.split(maxsplit=1)
+            global fm_id
+            fm_id = int(number)
+            try:
+                print(f_id)
+                await socket.send_team_message(f'Monitoring current furnace setup. ID of switch: {f_id} Chest ID: {fm_id}')
+                #add code here
+                async def check_items():
+                    while True:
+                        recent_chest_info = await socket.get_entity_info(fm_id)
+                        recent_chest_info = recent_chest_info.items
+                        #TODO asidjasidjwaosidfjsoadifj
+                        await asyncio.sleep(10)
+    
+                        
+                        if recent_chest_info == await socket.get_entity_info(fm_id):
+                            await socket.send_team_message('Furnaces are not cooking. Turning switch off.')
+                            await socket.set_entity_value(f_id, False)
+                        else:
+                            print('Furnaces are cooking!')
+                
+                # Start the loop as a background task
+                asyncio.create_task(check_items())
+            except:
+                await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
+
+
+    async def watchForDeaths():
+        reported_deaths = set()
+        while True:
+            team_info = await socket.get_team_info()
+            for i in range(len(team_info.members)):
+                if team_info.members[i].is_alive:
+                    try:
+                        reported_deaths.discard(team_info.members[i].steam_id)
+                        continue
+                    except:
+                        continue
+                if team_info.members[i].steam_id not in reported_deaths:
+                    reported_deaths.add(team_info.members[i].steam_id)
+                    name = 'dany' if team_info.members[i].steam_id == 76561199149660324 else team_info.members[i].name
+                    await socket.send_team_message(f'{name} is dead @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)}')
+            await asyncio.sleep(10)
+
+    asyncio.create_task(watchForDeaths())
+
+    
+            
+
+    #event
+    
+    @EntityEvent(server_details, 8188280)#8188280
+    async def areFurnacesActive(event: EntityEventPayload):
+        items = event.items
+        time.sleep(60)
+        if items == event.items:
+            await socket.set_entity_value(f_id, False)
+            await socket.send_team_message('Furnaces not cooking. Turning off.')
+        else:
+            await socket.send_team_message('Furnaces are cooking. Keeping on.')
+
         
 
 
+
+                
+
+    
+    
+        
+        
+    
     @Command(server_details)
     async def tc(command: ChatCommand):
         team_chat = await socket.get_team_chat()
@@ -155,18 +270,6 @@ async def main():
                 print("Invalid command format. Use: !tc <number>")
         else:
             print("No valid command detected.")
-        
-        
-        
-
-                
-
-    
-    
-        
-        
-    
-    
 
 
 
