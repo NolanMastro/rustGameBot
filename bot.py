@@ -4,13 +4,11 @@ import datetime
 from PIL import Image
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
 
-#send location of dead teamates
+
 #/turrets to turn on all turrets.
 #/blue_card shows nearby location to get blue card.
 #/red_card shows nearby location to get red card.
 
-
-#
 
 
 
@@ -55,12 +53,8 @@ async def main():
             gridLetterIndex = (gridLetterIndex // 26) - 1
         
         return f'{gridLetter}{gridNumber}'
-    
-    #print(convert_xy_to_grid(team_info.members[1].x,team_info.members[1].y, inital_data))
+
         
-
-
-
 
     #hi
     @Command(server_details,aliases=["hello", "hey", "HI", "Hi", "hI"])
@@ -117,26 +111,12 @@ async def main():
             await socket.send_team_message(f'Offline Members: {offlineMembers}')
 
 
-    @Command(server_details)
-    async def events(command: ChatCommand):
-        markers = await socket.get_markers()
-        for marker in markers:
-            #if marker.type in (1,3,7):
-                #continue
-            #else:
-            print(f'{types[marker.type]}, type {marker.type} detected at {convert_xy_to_grid(marker.x,marker.y,inital_data)}')
 
     def convert_epoch_to_hours(epoch_timestamp):
-        # Get the current time
         current_time = datetime.datetime.now()
-
-        # Convert the epoch timestamp to a datetime object
         target_time = datetime.datetime.fromtimestamp(epoch_timestamp)
-
-        # Calculate the difference
         time_difference = target_time - current_time
 
-        # Extract days, hours, and minutes
         days = time_difference.days
         hours, remainder = divmod(time_difference.seconds, 3600)
         minutes, _ = divmod(remainder, 60)
@@ -154,20 +134,21 @@ async def main():
             f_id = int(number)
             await socket.send_team_message(f'Set furnace smart switch to {f_id}')
     
-    @Command(server_details)# 5433672
+    @Command(server_details)
     async def f(command: ChatCommand):
         try:
             print(f_id)
+            switch_info = await socket.get_entity_info(f_id)
+            if switch_info.value:
+                await socket.set_entity_value(f_id, False)
+                await socket.send_team_message('Furnaces off.')
+            else:
+                await socket.set_entity_value(f_id, True)
+                await socket.send_team_message('Furnaces on.')
         except:
             await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
-        switch_info = await socket.get_entity_info(f_id)
-        if switch_info.value:
-            await socket.set_entity_value(f_id, False)
-            await socket.send_team_message('Furnaces off.')
-        else:
-            await socket.set_entity_value(f_id, True)
-            await socket.send_team_message('Furnaces on.')
-
+            
+        
 
     @Command(server_details)
     async def monitorf(command: ChatCommand):
@@ -180,28 +161,31 @@ async def main():
             try:
                 print(f_id)
                 await socket.send_team_message(f'Monitoring current furnace setup. ID of switch: {f_id} Chest ID: {fm_id}')
-                #add code here
                 async def check_items():
                     while True:
                         recent_chest_info = await socket.get_entity_info(fm_id)
-                        recent_chest_info = recent_chest_info.items
-                        #TODO asidjasidjwaosidfjsoadifj
                         await asyncio.sleep(10)
-    
-                        
-                        if recent_chest_info == await socket.get_entity_info(fm_id):
+
+                        new_chest_info = await socket.get_entity_info(fm_id)
+
+                        if recent_chest_info.items[-1].quantity == new_chest_info.items[-1].quantity:
                             await socket.send_team_message('Furnaces are not cooking. Turning switch off.')
                             await socket.set_entity_value(f_id, False)
                         else:
                             print('Furnaces are cooking!')
-                
-                # Start the loop as a background task
                 asyncio.create_task(check_items())
             except:
                 await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
 
 
-    async def watchForDeaths():
+    
+
+    
+            
+
+    #run on start events
+
+    async def watchForDeaths(): # may need work.
         reported_deaths = set()
         while True:
             team_info = await socket.get_team_info()
@@ -219,58 +203,6 @@ async def main():
             await asyncio.sleep(10)
 
     asyncio.create_task(watchForDeaths())
-
-    
-            
-
-    #event
-    
-    @EntityEvent(server_details, 8188280)#8188280
-    async def areFurnacesActive(event: EntityEventPayload):
-        items = event.items
-        time.sleep(60)
-        if items == event.items:
-            await socket.set_entity_value(f_id, False)
-            await socket.send_team_message('Furnaces not cooking. Turning off.')
-        else:
-            await socket.send_team_message('Furnaces are cooking. Keeping on.')
-
-        
-
-
-
-                
-
-    
-    
-        
-        
-    
-    @Command(server_details)
-    async def tc(command: ChatCommand):
-        team_chat = await socket.get_team_chat()
-        latest_message = team_chat[-1].message if team_chat else ""
-        
-        if latest_message.startswith("!tc"):
-            try:
-                _, number = latest_message.split(maxsplit=1)
-                entity_id = int(number)
-                print(f'trying socket with num {number}')
-                tc_info = await socket.get_entity_info(entity_id)
-                print(f'type: {tc_info.type}')
-                print(f'value{tc_info.value}')
-                print(f'capacity: {tc_info.capacity}')
-                print(f'has_protection: {tc_info.has_protection}')
-                days, hours, minutes = convert_epoch_to_hours(tc_info.protection_expiry)
-                print(f'epoch {tc_info.protection_expiry}')
-                print(f'until decay: {days} days, {hours} hours, {minutes} min')
-                
-            
-            except ValueError:
-                print("Invalid command format. Use: !tc <number>")
-        else:
-            print("No valid command detected.")
-
 
 
 
