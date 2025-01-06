@@ -1,11 +1,8 @@
 import asyncio
-import time
-import datetime
-from PIL import Image
+from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
 
 
-#/turrets to turn on all turrets.
 #/blue_card shows nearby location to get blue card.
 #/red_card shows nearby location to get red card.
 
@@ -39,33 +36,14 @@ async def main():
     
     inital_data = await socket.get_info()
 
-    
-    def convert_xy_to_grid(x, y, initdata):
-        trueSize = initdata.size
-        convertedSize = int(trueSize / 146.28571428571428)
-        gridLetterIndex = int(x / 146.28571428571428)
-        gridNumber = int(convertedSize - y / 146.28571428571428)
-        
-        alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        gridLetter = ""
-        while gridLetterIndex >= 0:
-            gridLetter = alphabet[gridLetterIndex % 26] + gridLetter
-            gridLetterIndex = (gridLetterIndex // 26) - 1
-        
-        return f'{gridLetter}{gridNumber}'
-
-        
 
     #hi
     @Command(server_details,aliases=["hello", "hey", "HI", "Hi", "hI"])
     async def hi(command : ChatCommand):
-        if command.sender_steam_id==76561199149660324:
-            await socket.send_team_message(f"Hi, diddy.")
+        if not verify_name(command.sender_name):
+            await socket.send_team_message(f"Hi, unknown team member.")
         else:
-            try:
-                await socket.send_team_message(f"Hi, {command.sender_name}.")
-            except:
-                await socket.send_team_message("Hi, void name.")
+            await socket.send_team_message(f"Hi, {command.sender_name}.")
     
     #pop       
     @Command(server_details)
@@ -83,25 +61,25 @@ async def main():
         team_info = await socket.get_team_info()
         message = ""
         offlineMembers = ""
-        for i in range(len(team_info.members)):
+        for member in team_info.members:
             if len(message) > 110:
                 await socket.send_team_message(message)
                 message = ""
 
-            if team_info.members[i].steam_id == 76561199149660324:
-                name = 'diddy'
+            if not verify_name(member.name):
+                name = 'unknown team member'
             else:
-                name = team_info.members[i].name
+                name = member.name
             
-            if not team_info.members[i].is_online:
+            if not member.is_online:
                 offlineMembers += name
                 offlineMembers += f"{Emoji.HEART}"
-            elif team_info.members[i].is_alive:
-                message += f'{name}: ALIVE @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)}\n'
+            elif member.is_alive:
+                message += f'{name}: ALIVE @{convert_xy_to_grid(member.x, member.y, inital_data)}\n'
                 message+=f'{Emoji.HEART}'
             else:
-                days, hours, minutes = convert_epoch_to_hours(team_info.members[i].death_time)
-                message += f'{name}: DEAD @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)} {minutes} min ago\n'
+                days, hours, minutes = convert_epoch_to_hours(member.death_time)
+                message += f'{name}: DEAD @{convert_xy_to_grid(member.x,member.y,inital_data)} {minutes} min ago\n'
                 message+=f'{Emoji.SKULL}'
             
         await socket.send_team_message(message)
@@ -112,17 +90,7 @@ async def main():
 
 
 
-    def convert_epoch_to_hours(epoch_timestamp):
-        current_time = datetime.datetime.now()
-        target_time = datetime.datetime.fromtimestamp(epoch_timestamp)
-        time_difference = target_time - current_time
-
-        days = time_difference.days
-        hours, remainder = divmod(time_difference.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
-
-        return days, hours, minutes
-
+    
 
     @Command(server_details)
     async def setf(command: ChatCommand):
@@ -184,22 +152,18 @@ async def main():
             
 
     #run on start events
-
     async def watchForDeaths():
         reported_deaths = set()
         while True:
             team_info = await socket.get_team_info()
-            for i in range(len(team_info.members)):
-                if team_info.members[i].is_alive:
-                    try:
-                        reported_deaths.discard(team_info.members[i].steam_id)
-                        continue
-                    except:
-                        continue
-                if team_info.members[i].steam_id not in reported_deaths:
-                    reported_deaths.add(team_info.members[i].steam_id)
-                    name = 'dany' if team_info.members[i].steam_id == 76561199149660324 else team_info.members[i].name
-                    await socket.send_team_message(f'{name} is dead @{convert_xy_to_grid(team_info.members[i].x, team_info.members[i].y, inital_data)}')
+            for member in team_info.members:
+                if member.is_alive:
+                    reported_deaths.discard(member.steam_id)
+                    continue
+                if member.steam_id not in reported_deaths:
+                    reported_deaths.add(member.steam_id)
+                    name = 'unknown team member' if not verify_name(member.name) else member.name
+                    await socket.send_team_message(f'{name} is dead @{convert_xy_to_grid(member.x, member.y, inital_data)}')
             await asyncio.sleep(10)
 
     asyncio.create_task(watchForDeaths())
