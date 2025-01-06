@@ -185,7 +185,7 @@ async def main():
 
     #run on start events
 
-    async def watchForDeaths(): # may need work.
+    async def watchForDeaths():
         reported_deaths = set()
         while True:
             team_info = await socket.get_team_info()
