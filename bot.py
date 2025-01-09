@@ -1,5 +1,5 @@
 import asyncio
-from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours
+from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
 
 
@@ -13,19 +13,56 @@ from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCom
 async def main():
     info={}
 
+    monuments = {
+    "ferryterminal": {"name": "Ferry Terminal", "card": None},
+    "train_tunnel_display_name": {"name": "Train Tunnels", "card": None},
+    "harbor_2_display_name": {"name": "Harbor", "card": None},
+    "harbor_display_name": {"name": "Harbor", "card": None},
+    "fishing_village_display_name": {"name": "Fishing Village", "card": None},
+    "large_fishing_village_display_name": {"name": "Large Fishing Village", "card": None},
+    "AbandonedMilitaryBase": {"name": "Abandoned Military Base", "card": None},
+    "arctic_base_a": {"name": "Arctic Base", "card": None},
+    "launchsite": {"name": "Launch Site", "card": None},
+    "train_yard_display_name": {"name": "Train Yard", "card": None},
+    "military_tunnels_display_name": {"name": "Minitary Tunnels", "card": None},
+    "excavator": {"name": "Excavator", "card": None},
+    "outpost": {"name": "Outpost", "card": None},
+    "missile_silo_monument": {"name": "Missile Silo", "card": None},
+    "junkyard_display_name": {"name": "Junkyard", "card": None},
+    "stables_a": {"name": "Barn", "card": None},
+    "airfield_display_name": {"name": "Airfield", "card": None},
+    "water_treatment_plant_display_name": {"name": "Water Treatment", "card": None},
+    "power_plant_display_name": {"name": "Power Plant", "card": None},
+    "sewer_display_name": {"name": "Sewer Branch", "card": None},
+    "satellite_dish_display_name": {"name": "Satellite Dish", "card": None},
+    "mining_quarry_hqm_display_name": {"name": "HQM Quarry", "card": None},
+    "mining_quarry_stone_display_name": {"name": "Stone Quarry", "card": None},
+    "mining_quarry_sulfur_display_name": {"name": "Sulfer Quarry", "card": None},
+    "dome_monument_name": {"name": "Dome", "card": None},
+    "stables_b": {"name": "Barn", "card": None},
+    "train_tunnel_link_display_name": {"name": "Train Tunnels", "card": None},
+    "mining_outpost_display_name": {"name": "Mining Outpost", "card": None},
+    "radtown": {"name": "Radtown", "card": None},
+    "gas_station": {"name": "Gas Station", "card": None},
+    "supermarket": {"name": "Supermarket", "card": None},
+    "underwater_lab": {"name": "Underwater Labs", "card": None},
+    "DungeonBase": {"name": "Dungeon Base", "card": None},
+    "oil_rig_small": {"name": "Small Oil", "card": None},
+    "large_oil_rig": {"name": "Large Oil", "card": None},
+    "lighthouse_display_name": {"name": "Lighthouse", "card": None}
+    }
+
+
+    
+
+
+    
+
+
+    
 
 
 
-    types = {
-                1: "Player",
-                2: "Explosion",
-                3: "VendingMachine",
-                4: "CH47",
-                5: "Cargo Ship",
-                6: "Locked Crate",
-                7: "Vendor",
-                8: "Attack Heli"
-            }
 
     options = CommandOptions(prefix="!")
     server_details = ServerDetails(info['ip'],  info['port'], info['playerId'], info['playerToken'])
@@ -35,6 +72,7 @@ async def main():
     print(f"It is {(await socket.get_time()).time} on {info['name']}")
     
     inital_data = await socket.get_info()
+    map = await socket.get_map_info()
 
 
     #hi
@@ -75,11 +113,11 @@ async def main():
                 offlineMembers += name
                 offlineMembers += f"{Emoji.HEART}"
             elif member.is_alive:
-                message += f'{name}: ALIVE @{convert_xy_to_grid(member.x, member.y, inital_data)}\n'
+                message += f'{name}: ALIVE @{convert_xy_to_grid(member.x, member.y, inital_data)} near {closest_monument(member.x,member.y,map.monuments)}\n'
                 message+=f'{Emoji.HEART}'
             else:
                 days, hours, minutes = convert_epoch_to_hours(member.death_time)
-                message += f'{name}: DEAD @{convert_xy_to_grid(member.x,member.y,inital_data)} {minutes} min ago\n'
+                message += f'{name}: DEAD @{convert_xy_to_grid(member.x,member.y,inital_data)} near {closest_monument(member.x,member.y,map.monuments)} {minutes} min ago\n'
                 message+=f'{Emoji.SKULL}'
             
         await socket.send_team_message(message)
@@ -115,7 +153,7 @@ async def main():
                 await socket.send_team_message('Furnaces on.')
         except:
             await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
-            
+    
         
 
     @Command(server_details)
@@ -167,6 +205,7 @@ async def main():
             await asyncio.sleep(10)
 
     asyncio.create_task(watchForDeaths())
+
 
 
 
