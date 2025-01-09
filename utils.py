@@ -31,3 +31,14 @@ def convert_epoch_to_hours(epoch_timestamp):
     minutes, _ = divmod(remainder, 60)
 
     return days, hours, minutes
+
+
+def closest_monument(x, y, monuments):
+        for monument in monuments:
+            distance_x = abs(x - monument.x)
+            distance_y = abs(y - monument.y)
+            
+            if distance_x <= 100 and distance_y <= 100:
+                return monument.token
+        
+        return None
