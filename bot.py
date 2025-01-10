@@ -6,17 +6,7 @@ from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCom
 
 async def main():
     info={
-    "id": "e2445ae2-9bb6-4f51-87a4-cbd45f8bdaa0",
-    "name": "Rustafied.com - US Main",
-    "desc": "Wipe: Weekly on Thursdays @ 3PM New York time (or when forced)\\nBase Pop: 400+ players | Map size: 4250 | BP Wipe: Monthly\\n\\n\\tREPORT A PLAYER: my.rustafied.com or in-game using /report\\n\\n\\tSTORE: rustafied.com/store\\t\\t|\\tSUPPORT: rustafied.com/support\\n\\tRULES: rustafied.com/rules\\t\\t|\\tDISCORD: discord.gg/rustafied\\n\\nWhat to expect:\\n\\t- High quality gameplay and player experience\\n\\t- Player based map voting for upcoming wipes\\n\\t- Custom anti-cheat and active server moderation\\n\\t- Hosted on the hig",
-    "img": "https://cdn.rustafied.systems/server-header-images/US Main.png",
-    "logo": "",
-    "url": "https://forum.rustafied.com/store/product/13-vip-slot-main/",
-    "ip": "104.143.2.214",
-    "port": "28017",
-    "playerId": "76561198843497689",
-    "playerToken": "-167557884",
-    "type": "server"
+    
 }
 
 
