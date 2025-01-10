@@ -36,7 +36,9 @@ monuments_readable = {
     "DungeonBase": {"name": "Dungeon Base", "card": None},
     "oil_rig_small": {"name": "Small Oil", "card": None},
     "large_oil_rig": {"name": "Large Oil", "card": None},
+    "swamp_c": {"name": "Swamp", "card": None},
     "lighthouse_display_name": {"name": "Lighthouse", "card": None}
+    
     }
 
 
