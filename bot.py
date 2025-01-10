@@ -5,7 +5,21 @@ from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCom
 
 
 async def main():
-    info={}
+    info={
+    "id": "e2445ae2-9bb6-4f51-87a4-cbd45f8bdaa0",
+    "name": "Rustafied.com - US Main",
+    "desc": "Wipe: Weekly on Thursdays @ 3PM New York time (or when forced)\\nBase Pop: 400+ players | Map size: 4250 | BP Wipe: Monthly\\n\\n\\tREPORT A PLAYER: my.rustafied.com or in-game using /report\\n\\n\\tSTORE: rustafied.com/store\\t\\t|\\tSUPPORT: rustafied.com/support\\n\\tRULES: rustafied.com/rules\\t\\t|\\tDISCORD: discord.gg/rustafied\\n\\nWhat to expect:\\n\\t- High quality gameplay and player experience\\n\\t- Player based map voting for upcoming wipes\\n\\t- Custom anti-cheat and active server moderation\\n\\t- Hosted on the hig",
+    "img": "https://cdn.rustafied.systems/server-header-images/US Main.png",
+    "logo": "",
+    "url": "https://forum.rustafied.com/store/product/13-vip-slot-main/",
+    "ip": "104.143.2.214",
+    "port": "28017",
+    "playerId": "76561198843497689",
+    "playerToken": "-167557884",
+    "type": "server"
+}
+
+
 
     
 
@@ -31,9 +45,7 @@ async def main():
                 sender_y = member.y
                 break
         closeBlueMonuments, closeBlueMonumentsCoordinates = closest_blue_monuments(sender_x,sender_y,map.monuments)                                                                                                                                                                                                                                                                                               #
-        await socket.send_team_message(f"The closest places to get a blue card are, {closeBlueMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data)}
-                                       , {closeBlueMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data)}
-                                       , {closeBlueMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data)}")
+        await socket.send_team_message(f"The closest places to get a blue card are, {closeBlueMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data)}, {closeBlueMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data)}, {closeBlueMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data)}")
 
     #red
     @Command(server_details)
@@ -45,9 +57,7 @@ async def main():
                 sender_y = member.y
                 break
         closeRedMonuments, closeRedMonumentsCoordinates = closest_red_monuments(sender_x,sender_y,map.monuments)
-        await socket.send_team_message(f"The closest places to get a blue card are, {closeRedMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data)}
-                                       , {closeRedMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data)}
-                                       , {closeRedMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data)}")
+        await socket.send_team_message(f"The closest places to get a red card are, {closeRedMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data)}, {closeRedMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data)}, {closeRedMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data)}")
             
             
 
@@ -105,8 +115,6 @@ async def main():
             pass
         else:
             await socket.send_team_message(f'Offline Members: {offlineMembers}')
-
-
 
     
 
