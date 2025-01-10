@@ -1,68 +1,13 @@
 import asyncio
-from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument
+from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument, closest_blue_monuments, closest_red_monuments, monuments_readable, grids_apart
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
-
-
-#/blue_card shows nearby location to get blue card.
-#/red_card shows nearby location to get red card.
-
-
 
 
 
 async def main():
     info={}
 
-    monuments = {
-    "ferryterminal": {"name": "Ferry Terminal", "card": None},
-    "train_tunnel_display_name": {"name": "Train Tunnels", "card": None},
-    "harbor_2_display_name": {"name": "Harbor", "card": None},
-    "harbor_display_name": {"name": "Harbor", "card": None},
-    "fishing_village_display_name": {"name": "Fishing Village", "card": None},
-    "large_fishing_village_display_name": {"name": "Large Fishing Village", "card": None},
-    "AbandonedMilitaryBase": {"name": "Abandoned Military Base", "card": None},
-    "arctic_base_a": {"name": "Arctic Base", "card": None},
-    "launchsite": {"name": "Launch Site", "card": None},
-    "train_yard_display_name": {"name": "Train Yard", "card": None},
-    "military_tunnels_display_name": {"name": "Minitary Tunnels", "card": None},
-    "excavator": {"name": "Excavator", "card": None},
-    "outpost": {"name": "Outpost", "card": None},
-    "missile_silo_monument": {"name": "Missile Silo", "card": None},
-    "junkyard_display_name": {"name": "Junkyard", "card": None},
-    "stables_a": {"name": "Barn", "card": None},
-    "airfield_display_name": {"name": "Airfield", "card": None},
-    "water_treatment_plant_display_name": {"name": "Water Treatment", "card": None},
-    "power_plant_display_name": {"name": "Power Plant", "card": None},
-    "sewer_display_name": {"name": "Sewer Branch", "card": None},
-    "satellite_dish_display_name": {"name": "Satellite Dish", "card": None},
-    "mining_quarry_hqm_display_name": {"name": "HQM Quarry", "card": None},
-    "mining_quarry_stone_display_name": {"name": "Stone Quarry", "card": None},
-    "mining_quarry_sulfur_display_name": {"name": "Sulfer Quarry", "card": None},
-    "dome_monument_name": {"name": "Dome", "card": None},
-    "stables_b": {"name": "Barn", "card": None},
-    "train_tunnel_link_display_name": {"name": "Train Tunnels", "card": None},
-    "mining_outpost_display_name": {"name": "Mining Outpost", "card": None},
-    "radtown": {"name": "Radtown", "card": None},
-    "gas_station": {"name": "Gas Station", "card": None},
-    "supermarket": {"name": "Supermarket", "card": None},
-    "underwater_lab": {"name": "Underwater Labs", "card": None},
-    "DungeonBase": {"name": "Dungeon Base", "card": None},
-    "oil_rig_small": {"name": "Small Oil", "card": None},
-    "large_oil_rig": {"name": "Large Oil", "card": None},
-    "lighthouse_display_name": {"name": "Lighthouse", "card": None}
-    }
-
-
     
-
-
-    
-
-
-    
-
-
-
 
     options = CommandOptions(prefix="!")
     server_details = ServerDetails(info['ip'],  info['port'], info['playerId'], info['playerToken'])
@@ -73,7 +18,38 @@ async def main():
     
     inital_data = await socket.get_info()
     map = await socket.get_map_info()
+    
+    
 
+    #blue
+    @Command(server_details)
+    async def blue(command: ChatCommand):
+        team_info = await socket.get_team_info()
+        for member in team_info.members:
+            if member.steam_id == command.sender_steam_id:
+                sender_x = member.x
+                sender_y = member.y
+                break
+        closeBlueMonuments, closeBlueMonumentsCoordinates = closest_blue_monuments(sender_x,sender_y,map.monuments)                                                                                                                                                                                                                                                                                               #
+        await socket.send_team_message(f"The closest places to get a blue card are, {closeBlueMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[0][0],closeBlueMonumentsCoordinates[0][1],inital_data)}
+                                       , {closeBlueMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[1][0],closeBlueMonumentsCoordinates[1][1],inital_data)}
+                                       , {closeBlueMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeBlueMonumentsCoordinates[2][0],closeBlueMonumentsCoordinates[2][1],inital_data)}")
+
+    #red
+    @Command(server_details)
+    async def red(command: ChatCommand):
+        team_info = await socket.get_team_info()
+        for member in team_info.members:
+            if member.steam_id == command.sender_steam_id:
+                sender_x = member.x
+                sender_y = member.y
+                break
+        closeRedMonuments, closeRedMonumentsCoordinates = closest_red_monuments(sender_x,sender_y,map.monuments)
+        await socket.send_team_message(f"The closest places to get a blue card are, {closeRedMonuments[0]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[0][0],closeRedMonumentsCoordinates[0][1],inital_data)}
+                                       , {closeRedMonuments[1]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[1][0],closeRedMonumentsCoordinates[1][1],inital_data)}
+                                       , {closeRedMonuments[2]['name']} {grids_apart(convert_xy_to_grid(sender_x,sender_y, inital_data),convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data))} grids away @{convert_xy_to_grid(closeRedMonumentsCoordinates[2][0],closeRedMonumentsCoordinates[2][1],inital_data)}")
+            
+            
 
     #hi
     @Command(server_details,aliases=["hello", "hey", "HI", "Hi", "hI"])
@@ -113,8 +89,12 @@ async def main():
                 offlineMembers += name
                 offlineMembers += f"{Emoji.HEART}"
             elif member.is_alive:
-                message += f'{name}: ALIVE @{convert_xy_to_grid(member.x, member.y, inital_data)} near {closest_monument(member.x,member.y,map.monuments)}\n'
-                message+=f'{Emoji.HEART}'
+                if closest_monument(member.x,member.y,map.monuments) == None:
+                    message += f'{name}: ALIVE @{convert_xy_to_grid(member.x, member.y, inital_data)}\n'
+                    message+=f'{Emoji.HEART}'
+                else:
+                    message += f'{name}: ALIVE @{monuments_readable[closest_monument(member.x,member.y,map.monuments)]["name"]} {convert_xy_to_grid(member.x, member.y, inital_data)}\n'
+                    message+=f'{Emoji.HEART}'
             else:
                 days, hours, minutes = convert_epoch_to_hours(member.death_time)
                 message += f'{name}: DEAD @{convert_xy_to_grid(member.x,member.y,inital_data)} near {closest_monument(member.x,member.y,map.monuments)} {minutes} min ago\n'
@@ -201,8 +181,11 @@ async def main():
                 if member.steam_id not in reported_deaths:
                     reported_deaths.add(member.steam_id)
                     name = 'unknown team member' if not verify_name(member.name) else member.name
-                    await socket.send_team_message(f'{name} is dead @{convert_xy_to_grid(member.x, member.y, inital_data)}')
-            await asyncio.sleep(10)
+                    if closest_monument(member.x,member.y,map.monuments) == None:
+                        await socket.send_team_message(f'{name} is dead @{convert_xy_to_grid(member.x, member.y, inital_data)}')
+                    else:
+                        await socket.send_team_message(f'{name} is dead @{monuments_readable[closest_monument(member.x,member.y,map.monuments)]["name"]} {convert_xy_to_grid(member.x, member.y, inital_data)}')
+            await asyncio.sleep(3)
 
     asyncio.create_task(watchForDeaths())
 
