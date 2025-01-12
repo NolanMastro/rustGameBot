@@ -37,9 +37,20 @@ monuments_readable = {
     "oil_rig_small": {"name": "Small Oil", "card": None},
     "large_oil_rig": {"name": "Large Oil", "card": None},
     "swamp_c": {"name": "Swamp", "card": None},
-    "lighthouse_display_name": {"name": "Lighthouse", "card": None}
+    "lighthouse_display_name": {"name": "Lighthouse", "card": None},
+    "bandit_camp": {"name": "Bandit", "card": None}
     
     }
+event_ids = {
+    1: "Player",
+    2: "Explosion",
+    3: "VendingMachine",
+    4: "CH47",
+    5: "Cargo",
+    6: "Crate",
+    7: "GenericRadius",
+    8: "Attack Heli"
+}
 
 
 def grids_apart(grid1, grid2):
@@ -80,7 +91,24 @@ def convert_xy_to_grid(x, y, initdata):
             gridLetterIndex = (gridLetterIndex // 26) - 1
         
         return f'{gridLetter}{gridNumber}'
+
+
+def whatCorner(x, y, initdata):
+    trueSize = initdata.size
     
+    mid_x = trueSize / 2
+    mid_y = trueSize / 2
+
+    if x < mid_x and y < mid_y:
+        return "Top Left"
+    elif x >= mid_x and y < mid_y:
+        return "Top Right"
+    elif x < mid_x and y >= mid_y:
+        return "Bottom Left"
+    else:
+        return "Bottom Right"
+
+
 def verify_name(name):
     for char in name:
         if not (char.isalpha() or char.isdigit() or char == " "):
