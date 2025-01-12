@@ -1,17 +1,18 @@
+import time
 import asyncio
-from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument, closest_blue_monuments, closest_red_monuments, monuments_readable, grids_apart
+from PIL import Image
+from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument, closest_blue_monuments, closest_red_monuments, monuments_readable, grids_apart, event_ids, whatCorner
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
 
-
+#try to bruteforce electrical item id's?
+#heli tracker
 
 async def main():
-    info={
-    
-}
+    info={}
 
 
 
-    
+
 
     options = CommandOptions(prefix="!")
     server_details = ServerDetails(info['ip'],  info['port'], info['playerId'], info['playerToken'])
@@ -161,11 +162,9 @@ async def main():
             except:
                 await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
 
-
+    
     
 
-    
-            
 
     #run on start events
     async def watchForDeaths():
@@ -186,6 +185,27 @@ async def main():
             await asyncio.sleep(3)
 
     asyncio.create_task(watchForDeaths())
+       
+
+    async def watchForCargoHeli(): #fix corner calcluation + add what direction cargo is going in.
+        reported_sightings = set()
+        while True:
+            event_info = await socket.get_markers()
+            for event in event_info:
+                if event.type in (5, 8): 
+                    if event.type not in reported_sightings:
+                        await socket.send_team_message(f'{event_ids[event.type]} is coming in from {whatCorner(event.x,event.y,inital_data)} {convert_xy_to_grid(event.x,event.y,inital_data)}.')
+                        reported_sightings.add(event.type)
+                else:
+                    reported_sightings.discard(event.type)
+            await asyncio.sleep(5)
+
+    asyncio.create_task(watchForCargoHeli())
+
+    
+
+
+
 
 
 
