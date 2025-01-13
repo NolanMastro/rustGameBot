@@ -5,8 +5,7 @@ from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, close
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
 from rustplus.utils.grab_items import translate_id_to_stack, translate_stack_to_id
 
-#try to bruteforce electrical item id's?
-#heli tracker
+#discord implementation? create a channel for each member in team, then on death send a map of teamate death location + personal location relative to them.
 
 async def main():
     info={}
