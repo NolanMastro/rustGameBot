@@ -3,13 +3,13 @@ import asyncio
 from PIL import Image
 from utils import verify_name, convert_xy_to_grid, convert_epoch_to_hours, closest_monument, closest_blue_monuments, closest_red_monuments, monuments_readable, grids_apart, event_ids, whatCorner
 from rustplus import RustSocket, CommandOptions, Command, ServerDetails, ChatCommand, EntityEventPayload, TeamEventPayload, ChatEventPayload, ProtobufEvent, ChatEvent, EntityEvent, TeamEvent, Emoji
+from rustplus.utils.grab_items import translate_id_to_stack, translate_stack_to_id
 
 #try to bruteforce electrical item id's?
 #heli tracker
 
 async def main():
     info={}
-
 
 
 
@@ -24,6 +24,42 @@ async def main():
     inital_data = await socket.get_info()
     map = await socket.get_map_info()
     
+
+
+    @Command(server_details)
+    async def search(command: ChatCommand):
+        team_chat = await socket.get_team_chat()
+        markers = await socket.get_markers()
+        latest_message = team_chat[-1].message if team_chat else ""
+        
+        if latest_message.startswith("!search"):
+            _, desired_item = latest_message.split(maxsplit=1)
+            desired_item = desired_item.lower().strip() 
+
+        matched_items = []
+        for marker in markers:
+            if marker.type == 3:
+                shop_sell_orders = marker.sell_orders
+                for item in shop_sell_orders:
+                    item_name = translate_id_to_stack(item.item_id).lower().strip()
+                    if desired_item in item_name:
+                        matched_items.append((item, marker))
+
+        if not matched_items:
+            await socket.send_team_message("No items found.")
+        else:
+            for item, marker in matched_items:
+                await socket.send_team_message(f"{item.quantity}x {translate_id_to_stack(item.item_id)}'s found at {convert_xy_to_grid(marker.x, marker.y, inital_data)} for {item.cost_per_item} {translate_id_to_stack(item.currency_id)}") #TODO add filters to ignore blood, bleach, etc. streamline output
+
+
+
+    
+            
+
+        
+        
+
+        
     
 
     #blue
@@ -131,7 +167,7 @@ async def main():
                 await socket.set_entity_value(f_id, True)
                 await socket.send_team_message('Furnaces on.')
         except:
-            await socket.send_team_message('The Id of the smart switch isnt set, use !setf id')
+            await socket.send_team_message('The Id of the smart switch isnt set or isnt valid, use !setf id')
     
         
 
@@ -202,8 +238,10 @@ async def main():
 
     asyncio.create_task(watchForCargoHeli())
 
-    
 
+
+
+    
 
 
 
