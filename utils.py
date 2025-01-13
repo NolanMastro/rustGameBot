@@ -99,14 +99,15 @@ def whatCorner(x, y, initdata):
     mid_x = trueSize / 2
     mid_y = trueSize / 2
 
-    if x < mid_x and y < mid_y:
+    if x < mid_x and y > mid_y:
         return "Top Left"
-    elif x >= mid_x and y < mid_y:
+    elif x >= mid_x and y > mid_y:
         return "Top Right"
-    elif x < mid_x and y >= mid_y:
+    elif x < mid_x and y <= mid_y:
         return "Bottom Left"
     else:
         return "Bottom Right"
+
 
 
 def verify_name(name):
