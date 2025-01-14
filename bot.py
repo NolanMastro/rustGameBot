@@ -41,24 +41,15 @@ async def main():
                 shop_sell_orders = marker.sell_orders
                 for item in shop_sell_orders:
                     item_name = translate_id_to_stack(item.item_id).lower().strip()
-                    if desired_item in item_name:
+                    if desired_item in item_name and item_name not in ["Blood", "Bleach"]:
                         matched_items.append((item, marker))
 
         if not matched_items:
             await socket.send_team_message("No items found.")
         else:
             for item, marker in matched_items:
-                await socket.send_team_message(f"{item.quantity}x {translate_id_to_stack(item.item_id)}'s found at {convert_xy_to_grid(marker.x, marker.y, inital_data)} for {item.cost_per_item} {translate_id_to_stack(item.currency_id)}") #TODO add filters to ignore blood, bleach, etc. streamline output
+                await socket.send_team_message(f"{item.quantity}x {translate_id_to_stack(item.item_id)}'s found at {convert_xy_to_grid(marker.x, marker.y, inital_data)} for {item.cost_per_item} {translate_id_to_stack(item.currency_id)}")
 
-
-
-    
-            
-
-        
-        
-
-        
     
 
     #blue
@@ -222,7 +213,7 @@ async def main():
     asyncio.create_task(watchForDeaths())
        
 
-    async def watchForCargoHeli(): #fix corner calcluation + add what direction cargo is going in.
+    async def watchForCargoHeli(): #add what direction cargo is going
         reported_sightings = set()
         while True:
             event_info = await socket.get_markers()
